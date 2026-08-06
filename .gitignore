@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+zh-cn-to-tw-backend/uploads/*
+!zh-cn-to-tw-backend/uploads/.gitkeep
+zh-cn-to-tw-backend/usage.db
+.DS_Store
+*.log
+.claude/

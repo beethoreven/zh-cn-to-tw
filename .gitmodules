@@ -1,0 +1,6 @@
+[submodule "zh-cn-to-tw-backend"]
+	path = zh-cn-to-tw-backend
+	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-backend.git
+[submodule "zh-cn-to-tw-web"]
+	path = zh-cn-to-tw-web
+	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-web.git
