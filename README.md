@@ -87,9 +87,16 @@ python3 app.py
 後端會跑在 `http://localhost:5001`。`.env` 裡的值只是預設值，介面上
 的欄位可以每次上傳/校對時個別覆蓋。
 
+除了 `GEMINI_API_KEY`，本機測試登入功能還需要在 `.env` 補上
+`GOOGLE_CLIENT_ID`（Google Cloud Console 申請的 OAuth Client ID）跟
+`PERMITTED_USER`（逗號分隔的授權 email 清單，至少放自己的帳號）。
+
 ### 前端
 
-直接用瀏覽器打開 `zh-cn-to-tw-web/index.html`，或用任何簡單的靜態伺服器：
+前端 `script.js` 是用瀏覽器直接打開（`file://`）還是用靜態伺服器開，
+會影響後端 CORS 判斷的來源網域——後端只放行 `https://beethoreven.github.io`
+跟任意 port 的 `localhost`/`127.0.0.1`，`file://` 開啟會被 CORS 擋掉，
+本機測試務必用底下這種靜態伺服器方式開，不要直接用瀏覽器開檔案：
 
 ```bash
 cd zh-cn-to-tw-web
@@ -100,9 +107,20 @@ python3 -m http.server 8000
 
 ## API 一覽
 
+以下除了 `/api/health`（keep-alive 用，刻意公開）跟 `/auth/status`
+（檢查登入狀態本身，未授權不算失敗）以外，全部都要帶
+`Authorization: Bearer <Google ID Token>`，沒帶或帳號不在
+`PERMITTED_USER` 白名單一律回 401。
+
+### 登入
+
+- `GET /api/health` — 健康檢查（公開，不需要登入）
+- `GET /auth/status` — 查詢目前這個 token 有沒有效、對應 email 有沒有
+  被授權（回 200 + `{authorized, email}`；只有 token 本身完全無效/過期
+  才回 401）
+
 ### Stage 1
 
-- `GET /api/health` — 健康檢查
 - `GET /api/options` — 前端畫設定欄位用：可選 model、各欄位上下限與說明
 - `GET /api/usage` — 每個 model 今日已用次數
 - `POST /api/jobs` — 上傳 PDF 開始處理，可帶 `model` / `batch_pages`
@@ -158,8 +176,14 @@ python3 -m http.server 8000
 - [x] Stage 1 新增「偵測首頁是否為封面」開關（預設開啟），純本機影像
   統計（`ocr_utils/cover_detect.py`），偵測到就自動移除首頁、不列入
   OCR 與後續處理，不需要任何付費 API
-- [ ] Stage 3：登入權限（沿用 fireless-war 的 Google OAuth + 白名單，
-  `usage_log` 表已預留 `user_email` 欄位）
+- [x] Stage 3：登入權限。Google Identity Services + 後端白名單（沿用
+  fireless-war 的模式，`auth_utils/auth.py` 驗證 ID Token，`whitelist.py`
+  比對 `PERMITTED_USER` 環境變數），前端把 token 存進 localStorage
+  （跟 fireless-war-web 不同的地方——重新整理、開新分頁都不會登出，
+  只有明確登出才清除），沒登入或未授權時整頁（含純顯示區塊）都鎖住並
+  跳 toast；後端每支會實際處理資料的路由都掛 `require_auth` 裝飾器，
+  前端鎖只是視覺提示，真正擋掉未授權存取的是後端。`usage_log` 表已有
+  `user_email` 欄位可用。
   - [ ] 權限分級：低權限使用者每日可用的 Gemini 3.6 Flash 次數要能限制
     （預設 20 次），使用者名單跟每人的次數上限都要能在後台設定，不是
     寫死在程式碼裡
