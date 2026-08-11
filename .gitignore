@@ -8,3 +8,6 @@ zh-cn-to-tw-backend/usage.db
 .DS_Store
 *.log
 .claude/
+deploy_backend.sh
+build_app.sh
+rebuild_service.sh
