@@ -193,9 +193,11 @@ python3 -m http.server 8000
   - [x] Stage 2 介面預設鎖住，Stage 1 完成或直接上傳成功才解鎖
   - [x] Claude token 用量（token 數 + 估計台幣費用），依劇本案分別統計
 - [x] 最左側獨立一欄「阿舍老師的叮嚀」內容區塊：純文字，內容來源是
-  `zh-cn-to-tw-web/teacher-notice.txt`（純靜態檔案，前端直接讀，不經過
-  後端 API、不需要登入），跟著前端程式碼進版控，要改內容直接編輯這個
-  檔案再 push，不需要動程式碼或另外做後台介面
+  `zh-cn-to-tw-backend/ta-notice.txt`，透過 `/api/teacher-notice` 端點
+  供應（不需要登入），瀏覽器版跟桌面版共用同一條路徑——桌面版用
+  `file://` 載入頁面，執行期沒辦法讀本機同目錄的其他檔案，所以改走
+  這個端點而不是直接讀檔案。要改內容直接編輯 `ta-notice.txt`，
+  commit、push、部署後端即可生效，不需要動程式碼
 - [x] Stage 1 新增「偵測首頁是否為封面」開關（預設開啟），純本機影像
   統計（`ocr_utils/cover_detect.py`），偵測到就自動移除首頁、不列入
   OCR 與後續處理，不需要任何付費 API
