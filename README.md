@@ -9,7 +9,7 @@
 | 子系統 | Repo | 部署/產出 |
 |---|---|---|
 | 後端 API | [`zh-cn-to-tw-backend`](https://github.com/beethoreven/zh-cn-to-tw-backend) | Render(`https://zh-cn-to-tw-backend.onrender.com`) |
-| 前端網站 | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | `app/` 子資料夾被桌面版 App 內嵌（實際功能都在這裡）；repo 根目錄是 GitHub Pages 的公開佔位頁，已不提供原本的操作介面 |
+| 前端網站 | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | `main` 分支被桌面版 App 內嵌（實際功能都在這裡）；GitHub Pages 服務的是另一個獨立的 `update-page` 分支，只有一個佔位頁，兩者沒有共同檔案 |
 | macOS 桌面殼 | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | 本機打包成 `.app` |
 | 本機 OCR 服務 | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | 本機打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
 
@@ -55,7 +55,7 @@ The project-overview repo for the *Script Murder Mystery Traditionalization Assi
 | Subsystem | Repo | Deployment/Output |
 |---|---|---|
 | Backend API | [`zh-cn-to-tw-backend`](https://github.com/beethoreven/zh-cn-to-tw-backend) | Render (`https://zh-cn-to-tw-backend.onrender.com`) |
-| Frontend | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | Its `app/` subfolder is embedded in the desktop app (that's where the real functionality lives); the repo root is GitHub Pages' public placeholder and no longer serves the original interface |
+| Frontend | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | Its `main` branch is embedded in the desktop app (that's where the real functionality lives); GitHub Pages serves a separate `update-page` branch holding only a placeholder, with no files in common |
 | macOS desktop shell | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | Packaged locally into a `.app` |
 | Local OCR service | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | Packaged locally into a standalone executable, embedded inside `zh-cn-to-tw-mac` |
 
