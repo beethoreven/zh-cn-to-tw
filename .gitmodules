@@ -4,3 +4,9 @@
 [submodule "zh-cn-to-tw-web"]
 	path = zh-cn-to-tw-web
 	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-web.git
+[submodule "zh-cn-to-tw-ocr-service"]
+	path = zh-cn-to-tw-ocr-service
+	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-ocr-service.git
+[submodule "zh-cn-to-tw-mac"]
+	path = zh-cn-to-tw-mac
+	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-mac.git
