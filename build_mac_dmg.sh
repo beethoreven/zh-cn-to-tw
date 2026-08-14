@@ -1,0 +1,1 @@
+zh-cn-to-tw-mac/packaging/build_dmg.sh

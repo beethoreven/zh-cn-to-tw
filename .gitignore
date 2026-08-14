@@ -10,5 +10,4 @@ zh-cn-to-tw-backend/usage.db
 .claude/
 deploy_backend.sh
 build_app.sh
-build_mac_dmg.sh
 rebuild_service.sh
