@@ -10,3 +10,6 @@
 [submodule "zh-cn-to-tw-mac"]
 	path = zh-cn-to-tw-mac
 	url = https://github.com/beethoreven/zh-cn-to-tw-mac.git
+[submodule "zh-cn-to-tw-windows"]
+	path = zh-cn-to-tw-windows
+	url = https://github.com/beethoreven/zh-cn-to-tw-windows.git

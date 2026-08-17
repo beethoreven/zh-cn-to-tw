@@ -4,11 +4,11 @@
 
 ## 這是什麼
 
-「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。有瀏覽器版跟 macOS 桌面版兩種使用方式，Windows 版正在規劃/開發中。
+「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。有瀏覽器版、macOS 桌面版兩種使用方式，Windows 桌面版開發中（Stage 1 已完成，見下面「目前線上狀態」）。
 
 ## Repo 結構
 
-這個 repo（`zh-cn-to-tw`）本身**不會被部署**，純粹是本機開發用的統一入口，透過 git submodule 掛著四個真正做事的 repo：
+這個 repo（`zh-cn-to-tw`）本身**不會被部署**，純粹是本機開發用的統一入口，透過 git submodule 掛著五個真正做事的 repo：
 
 | Submodule | 做什麼 | 部署/產出 |
 |---|---|---|
@@ -16,8 +16,9 @@
 | `zh-cn-to-tw-web` | 前端（vanilla JS，沒有 build 流程） | `main` 分支的內容被桌面版 App 直接內嵌打包，**不會**被 GitHub Pages 服務；GitHub Pages 服務的是完全獨立的 `update-page` 分支（orphan branch，跟 `main` 沒有共同檔案/歷史），內容是桌面版下載頁 |
 | `zh-cn-to-tw-mac` | macOS 桌面殼（Swift/SwiftUI + WKWebView），內嵌 `zh-cn-to-tw-web` 的網頁 + `zh-cn-to-tw-ocr-service` 的執行檔 | 本機打包成 `.app`/`.dmg`，發布到 GitHub Releases |
 | `zh-cn-to-tw-ocr-service` | 本機執行的 PaddleOCR HTTP 服務，只有桌面版會用到 | 本機用 PyInstaller 打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
+| `zh-cn-to-tw-windows` | Windows 桌面殼（.NET 8 WPF + WebView2），內嵌 `zh-cn-to-tw-web` 的網頁 | 規劃打包成 `.exe`，目前尚無打包腳本（見該 repo 的 README） |
 
-`git clone` 要用 HTTPS（`https://github.com/beethoreven/zh-cn-to-tw.git`），`.gitmodules` 裡四個子模組也是 HTTPS 網址——不要改回 SSH host alias 那種寫法，那種寫法綁死特定一台機器的 `~/.ssh/config`，換機器會直接解析失敗（已經實測撞過、修過一次）。
+`git clone` 要用 HTTPS（`https://github.com/beethoreven/zh-cn-to-tw.git`），`.gitmodules` 裡五個子模組也是 HTTPS 網址——不要改回 SSH host alias 那種寫法，那種寫法綁死特定一台機器的 `~/.ssh/config`，換機器會直接解析失敗（已經實測撞過、修過一次）。
 
 ## 為什麼架構長這樣（快速版，細節見 `zh-cn-to-tw-backend` README）
 
@@ -31,7 +32,7 @@
 - Backend/Web 部署在 Render/GitHub Pages，`main` 分支即時生效。
 - macOS App 走 GitHub Releases 版控（`zh-cn-to-tw-mac` repo 底下，`v<版本>-13-plus`/`v<版本>-12-minus` 兩個 tag，DMG 掛在對應 Release 上，檔名刻意用 ASCII，見下面「已知的坑」）。
 - 下載頁 `https://beethoreven.github.io/zh-cn-to-tw-web/` 直接連到 GitHub Release 的 DMG 檔案本身（不是先連到 Release 頁面），連結網址是釘死版本號的，**每次出新版要手動同步這個頁面的連結**（`zh-cn-to-tw-web` 的 `update-page` 分支）。
-- Windows 版：尚未開始，架構規劃跟 macOS 版一致，UI 框架還沒定案。
+- Windows 版：Stage 1 完成（WPF + WebView2 桌面殼，見 `zh-cn-to-tw-windows` 的 README）。已實測：殼能開起來、`file://` 載入前端、桌面版 Google 登入（系統瀏覽器 + loopback）、Stage 2 直接上傳繁體內容校對都正常運作。尚未開始：Stage 1 PDF/OCR 上傳（`zh-cn-to-tw-ocr-service` 還沒有 Windows 版）、Win7/CPU 架構相容性、打包成 `.exe`（`build_app_exe.bat`）、上線更新下載頁——這些是接下來 Windows 版 Stage 2/3 的範圍。
 
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 

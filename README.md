@@ -12,11 +12,9 @@
 | 前端網站 | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | `main` 分支被桌面版 App 內嵌（實際功能都在這裡）；GitHub Pages 服務的是另一個獨立的 `update-page` 分支，只有一個佔位頁，兩者沒有共同檔案 |
 | macOS 桌面殼 | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | 本機打包成 `.app` |
 | 本機 OCR 服務 | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | 本機打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
+| Windows 桌面殼 | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | 本機打包成 `.exe`（規劃中，見該 repo 的 README） |
 
-四個子系統現在都是這個 meta-repo 的 git submodule。
-
-未來若加入 Windows 版（`zh-cn-to-tw-windows`）等其他子系統，會用同樣
-方式以 `git submodule add` 掛進來。
+五個子系統現在都是這個 meta-repo 的 git submodule。
 
 ### 使用方式
 
@@ -37,7 +35,7 @@ git submodule update --init --recursive
 **更新某個子模組到它自己 repo 的最新版本：**
 
 ```bash
-cd zh-cn-to-tw-backend   # 或 zh-cn-to-tw-web / zh-cn-to-tw-mac / zh-cn-to-tw-ocr-service
+cd zh-cn-to-tw-backend   # 或 zh-cn-to-tw-web / zh-cn-to-tw-mac / zh-cn-to-tw-ocr-service / zh-cn-to-tw-windows
 git pull origin main
 cd ..
 git add zh-cn-to-tw-backend
@@ -60,11 +58,9 @@ The project-overview repo for the *Script Murder Mystery Traditionalization Assi
 | Frontend | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | Its `main` branch is embedded in the desktop app (that's where the real functionality lives); GitHub Pages serves a separate `update-page` branch holding only a placeholder, with no files in common |
 | macOS desktop shell | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | Packaged locally into a `.app` |
 | Local OCR service | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | Packaged locally into a standalone executable, embedded inside `zh-cn-to-tw-mac` |
+| Windows desktop shell | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | Packaged locally into an `.exe` (in progress, see that repo's README) |
 
-All four subsystems are now git submodules of this meta-repo.
-
-Future subsystems (a Windows version — `zh-cn-to-tw-windows` — and
-others) will be wired in the same way via `git submodule add`.
+All five subsystems are now git submodules of this meta-repo.
 
 ### Usage
 
@@ -85,7 +81,7 @@ git submodule update --init --recursive
 **Updating a submodule to its own repo's latest version:**
 
 ```bash
-cd zh-cn-to-tw-backend   # or zh-cn-to-tw-web / zh-cn-to-tw-mac / zh-cn-to-tw-ocr-service
+cd zh-cn-to-tw-backend   # or zh-cn-to-tw-web / zh-cn-to-tw-mac / zh-cn-to-tw-ocr-service / zh-cn-to-tw-windows
 git pull origin main
 cd ..
 git add zh-cn-to-tw-backend
