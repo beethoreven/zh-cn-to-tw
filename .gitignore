@@ -7,7 +7,12 @@ zh-cn-to-tw-backend/uploads/*
 zh-cn-to-tw-backend/usage.db
 .DS_Store
 *.log
-.claude/
+# .claude/ 大部分內容是本機的（settings.local.json、session 快取等），
+# 不要進版控；但 .claude/skills/ 是刻意例外——這是專案自帶的 Claude
+# Code skill（zh-en-readme/known-issue-check/update_version），要跟著
+# git clone 一起到任何一台機器上都能用，不能被這條規則整包忽略掉。
+.claude/*
+!.claude/skills/
 deploy_backend.sh
 build_app.sh
 rebuild_service.sh

@@ -23,8 +23,10 @@
 **第一次拿到全部程式碼：**
 
 ```bash
-git clone --recurse-submodules git@github.com-beethoreven:beethoreven/zh-cn-to-tw.git
+git clone --recurse-submodules https://github.com/beethoreven/zh-cn-to-tw.git
 ```
+
+用 HTTPS，不要用 SSH host alias 那種寫法——`.gitmodules` 裡四個子模組的網址本來寫死成只有原本那台開發機才有設定的 SSH host alias，換一台機器 `git submodule update --init` 會直接解不到那個主機、四個子模組全部初始化失敗（實測撞過），已經改成一般的 HTTPS 網址，搭配 `gh auth login` 的 HTTPS 認證，任何機器都能直接用。
 
 **已經 clone 過，只是要把子模組抓齊：**
 
@@ -69,8 +71,10 @@ others) will be wired in the same way via `git submodule add`.
 **First time cloning everything:**
 
 ```bash
-git clone --recurse-submodules git@github.com-beethoreven:beethoreven/zh-cn-to-tw.git
+git clone --recurse-submodules https://github.com/beethoreven/zh-cn-to-tw.git
 ```
+
+Use HTTPS, not an SSH host alias — `.gitmodules` used to hard-code each submodule's URL to an SSH host alias that only existed on one particular dev machine's `~/.ssh/config`; on any other machine, `git submodule update --init` couldn't resolve that host at all and every submodule failed to initialize (hit this for real). Fixed to plain HTTPS URLs, paired with `gh auth login`'s HTTPS auth — works on any machine.
 
 **Already cloned, just need to fetch the submodules:**
 
