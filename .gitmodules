@@ -1,12 +1,12 @@
 [submodule "zh-cn-to-tw-backend"]
 	path = zh-cn-to-tw-backend
-	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-backend.git
+	url = https://github.com/beethoreven/zh-cn-to-tw-backend.git
 [submodule "zh-cn-to-tw-web"]
 	path = zh-cn-to-tw-web
-	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-web.git
+	url = https://github.com/beethoreven/zh-cn-to-tw-web.git
 [submodule "zh-cn-to-tw-ocr-service"]
 	path = zh-cn-to-tw-ocr-service
-	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-ocr-service.git
+	url = https://github.com/beethoreven/zh-cn-to-tw-ocr-service.git
 [submodule "zh-cn-to-tw-mac"]
 	path = zh-cn-to-tw-mac
-	url = git@github.com-beethoreven:beethoreven/zh-cn-to-tw-mac.git
+	url = https://github.com/beethoreven/zh-cn-to-tw-mac.git
