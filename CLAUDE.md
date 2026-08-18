@@ -25,12 +25,12 @@
 - **OCR 為什麼跑在使用者本機、不是後端**：PaddleOCR 記憶體/CPU 需求會直接把 Render 免費方案打爆（OOM、SIGILL）。桌面版把 OCR 移到本機執行；瀏覽器版目前程式碼還在但實務上不會被真的用到（GitHub Pages 只服務下載頁，不會有人從瀏覽器直接連到會觸發 OCR 的頁面）。
 - **桌面版網頁用 `file://` 載入、不是本機 HTTP server**：本機 server 的 port 每次啟動都不一樣，會讓 `localStorage`（登入 session）的 origin 跟著變，等於每次開 App 都要重新登入。固定的 `file://` 路徑讓 origin 穩定。
 - **登入 session 是應用程式自己發的、不是直接用 Google ID Token**：Google ID Token 只活 ~1 小時，直接拿來當長效憑證，長任務跑到一半會被登出、已經花錢算出來的結果存不進去。见 `google-auth`（使用者層級 skill，未搬進這個 repo，因為是通用模式不是這個專案專屬知識）。
-- **macOS 13+ / 12- 兩包分開版控**：`Package.swift` 的 `platforms` 是整個 SwiftPM package 共用一份，沒有 per-target 部署目標，沒辦法在同一個 target 裡同時支援 13+ 用的 `App`/`Scene`/`WindowGroup`（要 11.0+）又支援到 10.15。`zh-cn-to-tw-mac/Legacy/` 是完全獨立的第二個 SwiftPM package（部署目標 10.15），大部分原始碼用符號連結共用 `Sources/ZhCnToTw/` 同一份，只有進入點（`App.swift`）不同。12- 那包 Stage 1 在網頁層直接鎖住（不會畫任何表單），只留 Stage 2。
+- **macOS 11+ / 10.15 兩包分開版控**：`Package.swift` 的 `platforms` 是整個 SwiftPM package 共用一份，沒有 per-target 部署目標，沒辦法在同一個 target 裡同時支援 11+ 用的 `App`/`Scene`/`WindowGroup`（要 11.0+）又支援到 10.15。`zh-cn-to-tw-mac/Legacy/` 是完全獨立的第二個 SwiftPM package（部署目標 10.15），大部分原始碼用符號連結共用 `Sources/ZhCnToTw/` 同一份，只有進入點（`App.swift`）不同。10.15 那包 Stage 1 改用 Apple 原生 Vision framework 做 OCR，不透過 `zh-cn-to-tw-ocr-service`——onnxruntime（RapidOCR 依賴的推論引擎）編譯二進位檔 `minos` 寫死 11.0，10.15 上跑不動任何 Python-based OCR 引擎，這是 `otool -l` 直接查證過的硬限制，不是設計選擇。
 
 ## 目前線上狀態
 
 - Backend/Web 部署在 Render/GitHub Pages，`main` 分支即時生效。
-- macOS App 走 GitHub Releases 版控（`zh-cn-to-tw-mac` repo 底下，`v<版本>-13-plus`/`v<版本>-12-minus` 兩個 tag，DMG 掛在對應 Release 上，檔名刻意用 ASCII，見下面「已知的坑」）。
+- macOS App 走 GitHub Releases 版控（`zh-cn-to-tw-mac` repo 底下，`v<版本>-11-plus`/`v<版本>-10-15` 兩個 tag，DMG 掛在對應 Release 上，檔名刻意用 ASCII，見下面「已知的坑」）。
 - 下載頁 `https://beethoreven.github.io/zh-cn-to-tw-web/` 直接連到 GitHub Release 的 DMG 檔案本身（不是先連到 Release 頁面），連結網址是釘死版本號的，**每次出新版要手動同步這個頁面的連結**（`zh-cn-to-tw-web` 的 `update-page` 分支）。
 - Windows 版：Stage 1 完成（WPF + WebView2 桌面殼，見 `zh-cn-to-tw-windows` 的 README）。已實測：殼能開起來、`file://` 載入前端、桌面版 Google 登入（系統瀏覽器 + loopback）、Stage 2 直接上傳繁體內容校對都正常運作。尚未開始：Stage 1 PDF/OCR 上傳（`zh-cn-to-tw-ocr-service` 還沒有 Windows 版）、Win7/CPU 架構相容性、打包成 `.exe`（`build_app_exe.bat`）、上線更新下載頁——這些是接下來 Windows 版 Stage 2/3 的範圍。
 
@@ -49,4 +49,4 @@
 
 ## 待處理事項
 
-- **OCR 與 Stage 2 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2）。已經動手拆過一次（12- 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
+- **OCR 與 Stage 2 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
