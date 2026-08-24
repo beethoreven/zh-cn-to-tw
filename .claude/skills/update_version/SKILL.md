@@ -3,6 +3,14 @@ name: update_version
 description: Bump the zh-cn-to-tw macOS app's version number for one or both OS tiers (11+ and/or 10.15). Takes one argument like "1.1" (major.minor), optionally followed by a tier ("11+" or "10.15"; omitted means both). Updates the relevant Info.plist file(s) (CFBundleShortVersionString) and the matching app_versions rows (keyed by (os, os_version)) in the Neon DB via zh-cn-to-tw-backend. Use when the user says "/update_version <version>" or asks to bump/change the app version number.
 ---
 
+這支是這個 repo 專屬版，跟 `~/.claude/skills/update_version/` 那個全域
+版是同名 skill——在這個 repo 目錄下工作時，這支專案版優先生效；換到
+別的專案，會落到全域版（單純掃描 repo 找版本欄位、逐一改成指定值，
+不知道任何專案專屬的額外步驟）。這支之所以獨立存在，是因為這個專案
+除了改 `Info.plist` 之外，還要同步一個全域版不可能知道的東西：Neon DB
+裡 `app_versions` 表的強制更新門檻——這一步是這個專案的業務邏輯，不是
+「掃檔案改版號」這種通用模式能覆蓋的，所以留在專案層維護。
+
 把桌面版 App 的版本號改成使用者指定的新版本，同步更新兩個地方。這個
 專案現在有兩個獨立版控的桌面 build（見 `zh-cn-to-tw-mac` README「版本
 分流」、`zh-cn-to-tw-backend` README「版本檢查」）：
