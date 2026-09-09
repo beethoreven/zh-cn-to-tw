@@ -13,3 +13,6 @@
 [submodule "zh-cn-to-tw-windows"]
 	path = zh-cn-to-tw-windows
 	url = https://github.com/beethoreven/zh-cn-to-tw-windows.git
+[submodule "docx-wordcount"]
+	path = docx-wordcount
+	url = https://github.com/beethoreven/docx-wordcount.git

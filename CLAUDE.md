@@ -18,7 +18,9 @@
 | `zh-cn-to-tw-ocr-service` | 本機執行的 PaddleOCR HTTP 服務，只有桌面版會用到 | 本機用 PyInstaller 打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
 | `zh-cn-to-tw-windows` | Windows 桌面殼（.NET 8 WPF + WebView2），內嵌 `zh-cn-to-tw-web` 的網頁 | 規劃打包成 `.exe`，目前尚無打包腳本（見該 repo 的 README） |
 
-`git clone` 要用 HTTPS（`https://github.com/beethoreven/zh-cn-to-tw.git`），`.gitmodules` 裡五個子模組也是 HTTPS 網址——不要改回 SSH host alias 那種寫法，那種寫法綁死特定一台機器的 `~/.ssh/config`，換機器會直接解析失敗（已經實測撞過、修過一次）。
+`git clone` 要用 HTTPS（`https://github.com/beethoreven/zh-cn-to-tw.git`），`.gitmodules` 裡的子模組也是 HTTPS 網址——不要改回 SSH host alias 那種寫法，那種寫法綁死特定一台機器的 `~/.ssh/config`，換機器會直接解析失敗（已經實測撞過、修過一次）。
+
+除了上面五個之外，另外還掛了一個 `docx-wordcount` submodule——跟「劇本殺繁化助手」這個產品完全無關，是計算 `.docx` 字數（含一個 Windows GUI 版）的個人工具，純粹因為方便本機開發才放在這個 meta-repo 底下一起管理，見該 repo 自己的 README。
 
 ## 為什麼架構長這樣（快速版，細節見 `zh-cn-to-tw-backend` README）
 
@@ -38,7 +40,7 @@
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
 - **`zh-en-readme`**：這個專案所有 README 的格式慣例（中文報告 + SOP，英文鏡像，一段一行不手動硬換行）。改動任何 repo 的 README 前後都套用這個格式。
-- **`known-issue-check`**：累積的真實踩坑清單（目前 21 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
+- **`known-issue-check`**：累積的真實踩坑清單（目前 27 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
 - **`update_version`**：桌面版 App 出新版本號時用，同步更新 `Info.plist`（兩個分流各一份）跟 backend DB 的 `app_versions` 表。
 
 ## 跟這個專案協作時的慣例
