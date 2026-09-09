@@ -16,6 +16,8 @@
 
 五個子系統現在都是這個 meta-repo 的 git submodule。
 
+另外還掛了一個 [`docx-wordcount`](https://github.com/beethoreven/docx-wordcount) submodule，跟這個產品完全無關——是計算 `.docx` 字數的個人工具，純粹因為方便本機開發才放在這裡一起管理，見該 repo 自己的 README。
+
 ### 使用方式
 
 **第一次拿到全部程式碼：**
@@ -61,6 +63,8 @@ The project-overview repo for the *Script Murder Mystery Traditionalization Assi
 | Windows desktop shell | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | Packaged locally into an `.exe` (in progress, see that repo's README) |
 
 All five subsystems are now git submodules of this meta-repo.
+
+There's also a [`docx-wordcount`](https://github.com/beethoreven/docx-wordcount) submodule mounted here — entirely unrelated to this product, a personal .docx word-count tool kept here purely for local-dev convenience; see that repo's own README.
 
 ### Usage
 
