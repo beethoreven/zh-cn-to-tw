@@ -4,7 +4,7 @@
 
 ## 這是什麼
 
-「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。有瀏覽器版、macOS 桌面版兩種使用方式，Windows 桌面版開發中（Stage 1 已完成，見下面「目前線上狀態」）。
+「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。macOS 桌面版是唯一的使用方式（OCR 一定在使用者本機做），Windows 桌面版開發中（Stage 1 已完成，見下面「目前線上狀態」）。
 
 ## Repo 結構
 
@@ -24,7 +24,7 @@
 
 ## 為什麼架構長這樣（快速版，細節見 `zh-cn-to-tw-backend` README）
 
-- **OCR 為什麼跑在使用者本機、不是後端**：PaddleOCR 記憶體/CPU 需求會直接把 Render 免費方案打爆（OOM、SIGILL）。桌面版把 OCR 移到本機執行；瀏覽器版目前程式碼還在但實務上不會被真的用到（GitHub Pages 只服務下載頁，不會有人從瀏覽器直接連到會觸發 OCR 的頁面）。
+- **OCR 為什麼跑在使用者本機、不是後端**：PaddleOCR 記憶體/CPU 需求會直接把 Render 免費方案打爆（OOM、SIGILL）。桌面版把 OCR 移到本機執行。伺服器端 OCR 路徑（`POST /api/jobs`、`ocr_utils/`、paddle）已在 2026-10-03 整個拔掉，backend 只收 OCR 完的文字——**不要再把任何 OCR 相關的東西加回後端**，使用者明確要求線上只留 AI 呼叫、DB、帳號這類本來就要連網的部分。拔掉 paddle 也讓 backend 從 Python 3.9 升到 3.12（細節見 `zh-cn-to-tw-backend` README「拔掉伺服器端 OCR、升級到 Python 3.12」）。
 - **桌面版網頁用 `file://` 載入、不是本機 HTTP server**：本機 server 的 port 每次啟動都不一樣，會讓 `localStorage`（登入 session）的 origin 跟著變，等於每次開 App 都要重新登入。固定的 `file://` 路徑讓 origin 穩定。
 - **登入 session 是應用程式自己發的、不是直接用 Google ID Token**：Google ID Token 只活 ~1 小時，直接拿來當長效憑證，長任務跑到一半會被登出、已經花錢算出來的結果存不進去。见 `google-auth`（使用者層級 skill，未搬進這個 repo，因為是通用模式不是這個專案專屬知識）。
 - **Render 與 Neon 必須開在同一個區域**（目前兩邊都是 AWS `ap-southeast-1` 新加坡）：這不是最佳化偏好，是這個系統效能的主要決定因素。原本 Neon 誤建在 `us-east-2`（俄亥俄），每次資料庫連線要跨太平洋往返六趟，光是一個 `COUNT` 查詢的端點就要 1.76 秒；搬到同區之後純資料庫成本降到 0.03 秒（約 59 倍）。**既有 Neon project 不能改區域**，只能新建再搬資料。判斷方法是一個比值：用 socket 量純 TCP 握手（恰好一個往返），拿建立連線的成本去除它，商數落在小整數（Postgres 是 6：TCP 1 + TLS 1-2 + SCRAM 約 3）就代表成本全是網路往返、換連線池也除不掉。完整推論見 `zh-cn-to-tw-backend/db_utils/connection.py` 的歷史教訓四與 `known-issue-check` item 25。
