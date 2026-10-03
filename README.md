@@ -12,7 +12,7 @@
 | 前端網站 | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | `main` 分支被桌面版 App 內嵌（實際功能都在這裡）；GitHub Pages 服務的是另一個獨立的 `update-page` 分支，只有一個佔位頁，兩者沒有共同檔案 |
 | macOS 桌面殼 | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | 本機打包成 `.app` |
 | 本機 OCR 服務 | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | 本機打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
-| Windows 桌面殼 | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | 本機打包成 `.exe`（規劃中，見該 repo 的 README） |
+| Windows 桌面殼 | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | 本機打包成安裝檔 `.exe`（`build_app_exe.bat`），發布到 GitHub Releases |
 
 五個子系統現在都是這個 meta-repo 的 git submodule。
 
@@ -60,7 +60,7 @@ The project-overview repo for the *Script Murder Mystery Traditionalization Assi
 | Frontend | [`zh-cn-to-tw-web`](https://github.com/beethoreven/zh-cn-to-tw-web) | Its `main` branch is embedded in the desktop app (that's where the real functionality lives); GitHub Pages serves a separate `update-page` branch holding only a placeholder, with no files in common |
 | macOS desktop shell | [`zh-cn-to-tw-mac`](https://github.com/beethoreven/zh-cn-to-tw-mac) | Packaged locally into a `.app` |
 | Local OCR service | [`zh-cn-to-tw-ocr-service`](https://github.com/beethoreven/zh-cn-to-tw-ocr-service) | Packaged locally into a standalone executable, embedded inside `zh-cn-to-tw-mac` |
-| Windows desktop shell | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | Packaged locally into an `.exe` (in progress, see that repo's README) |
+| Windows desktop shell | [`zh-cn-to-tw-windows`](https://github.com/beethoreven/zh-cn-to-tw-windows) | Packaged locally into an installer `.exe` (`build_app_exe.bat`), published to GitHub Releases |
 
 All five subsystems are now git submodules of this meta-repo.
 

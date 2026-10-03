@@ -4,7 +4,7 @@
 
 ## 這是什麼
 
-「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。macOS 桌面版是唯一的使用方式（OCR 一定在使用者本機做），Windows 桌面版開發中（Stage 1 已完成，見下面「目前線上狀態」）。
+「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。桌面版是唯一的使用方式（OCR 一定在使用者本機做），有 macOS、Windows 兩種桌面版（見下面「目前線上狀態」）。
 
 ## Repo 結構
 
@@ -15,8 +15,8 @@
 | `zh-cn-to-tw-backend` | Flask API，OCR 以外的所有業務邏輯（LLM 呼叫、DB、auth、額度） | Render（`https://zh-cn-to-tw-backend.onrender.com`） |
 | `zh-cn-to-tw-web` | 前端（vanilla JS，沒有 build 流程） | `main` 分支的內容被桌面版 App 直接內嵌打包，**不會**被 GitHub Pages 服務；GitHub Pages 服務的是完全獨立的 `update-page` 分支（orphan branch，跟 `main` 沒有共同檔案/歷史），內容是桌面版下載頁 |
 | `zh-cn-to-tw-mac` | macOS 桌面殼（Swift/SwiftUI + WKWebView），內嵌 `zh-cn-to-tw-web` 的網頁 + `zh-cn-to-tw-ocr-service` 的執行檔 | 本機打包成 `.app`/`.dmg`，發布到 GitHub Releases |
-| `zh-cn-to-tw-ocr-service` | 本機執行的 PaddleOCR HTTP 服務，只有桌面版會用到 | 本機用 PyInstaller 打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` |
-| `zh-cn-to-tw-windows` | Windows 桌面殼（.NET 8 WPF + WebView2），內嵌 `zh-cn-to-tw-web` 的網頁 | 規劃打包成 `.exe`，目前尚無打包腳本（見該 repo 的 README） |
+| `zh-cn-to-tw-ocr-service` | 本機執行的 PaddleOCR HTTP 服務，只有桌面版會用到 | 本機用 PyInstaller 打包成獨立執行檔，內嵌進 `zh-cn-to-tw-mac` 與 `zh-cn-to-tw-windows` |
+| `zh-cn-to-tw-windows` | Windows 桌面殼（.NET 8 WPF + WebView2），內嵌 `zh-cn-to-tw-web` 的網頁 + `zh-cn-to-tw-ocr-service` 的執行檔 | 本機用 meta-repo 根目錄的 `build_app_exe.bat`（實際工作在該 repo 的 `packaging/build_installer.bat`）打包成 Inno Setup 安裝檔 `ZhCnToTw-Setup-<版本>.exe`，發布到 GitHub Releases |
 
 `git clone` 要用 HTTPS（`https://github.com/beethoreven/zh-cn-to-tw.git`），`.gitmodules` 裡的子模組也是 HTTPS 網址——不要改回 SSH host alias 那種寫法，那種寫法綁死特定一台機器的 `~/.ssh/config`，換機器會直接解析失敗（已經實測撞過、修過一次）。
 
@@ -35,7 +35,7 @@
 - Backend/Web 部署在 Render/GitHub Pages，`main` 分支即時生效。
 - macOS App 走 GitHub Releases 版控（`zh-cn-to-tw-mac` repo 底下，`v<版本>-11-plus`/`v<版本>-10-15` 兩個 tag，DMG 掛在對應 Release 上，檔名刻意用 ASCII，見下面「已知的坑」）。
 - 下載頁 `https://beethoreven.github.io/zh-cn-to-tw-web/` 直接連到 GitHub Release 的 DMG 檔案本身（不是先連到 Release 頁面），連結網址是釘死版本號的，**每次出新版要手動同步這個頁面的連結**（`zh-cn-to-tw-web` 的 `update-page` 分支）。
-- Windows 版：Stage 1 完成（WPF + WebView2 桌面殼，見 `zh-cn-to-tw-windows` 的 README）。已實測：殼能開起來、`file://` 載入前端、桌面版 Google 登入（系統瀏覽器 + loopback）、Stage 2 直接上傳繁體內容校對都正常運作。尚未開始：Stage 1 PDF/OCR 上傳（`zh-cn-to-tw-ocr-service` 還沒有 Windows 版）、Win7/CPU 架構相容性、打包成 `.exe`（`build_app_exe.bat`）、上線更新下載頁——這些是接下來 Windows 版 Stage 2/3 的範圍。
+- Windows 版：已上線，走 GitHub Releases 版控（`zh-cn-to-tw-windows` repo 底下，tag 是 `v<版本>`，安裝檔 `ZhCnToTw-Setup-<版本>.exe` 掛在對應 Release 上，檔名同樣用 ASCII），下載頁也有 Windows 區塊，出新版一樣要手動同步連結。單一 build 支援 Windows 10（1607 以上）／11 的 64 位元，不支援 Win7。本機 OCR 已接上（跟 Mac 11+ 共用 `zh-cn-to-tw-ocr-service`，殼用 Job Object 確保子行程不會變孤兒）。版本號跟 Mac 版同步但沒有共用機制，寫死在三個地方要一起改：`ZhCnToTw.csproj`、`packaging/installer.iss`、`MainWindow.xaml.cs` 的 `appMinor`；`update_version` skill 只管 Mac，不會動到這三處。Windows 回報的 `osTier=windows` 在後端 `app_versions` 表沒有對應資料列，所以強制更新門檻目前對 Windows 不生效。細節與出新版的步驟見 `zh-cn-to-tw-windows` 的 README。
 
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
