@@ -40,7 +40,7 @@
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
 - **`zh-en-readme`**：這個專案所有 README 的格式慣例（中文報告 + SOP，英文鏡像，一段一行不手動硬換行）。改動任何 repo 的 README 前後都套用這個格式。
-- **`known-issue-check`**：累積的真實踩坑清單（目前 27 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
+- **`known-issue-check`**：累積的真實踩坑清單（目前 28 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
 - **`update_version`**：桌面版 App 出新版本號時用，同步更新 `Info.plist`（兩個分流各一份）跟 backend DB 的 `app_versions` 表。
 
 ## 跟這個專案協作時的慣例
