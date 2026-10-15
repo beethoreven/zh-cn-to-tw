@@ -1,5 +1,7 @@
 # Mac 2.0 交接報告（2026-10-15）
 
+> **狀態：已完成（2026-10-16）。** Mac 殼改用 `zhcntotw://app`（`zh-cn-to-tw-mac` `59d7d9a`）、打包腳本改複製 2.0 前端（`fad39ef`），`v2` 已合併進 web 的 `main`，Mac 2.0 兩包已發布。下面保留當時的交接內容供日後參考。
+
 給在 Mac 上接手 `zh-cn-to-tw-mac` 的人／Claude session。Windows 2.0 已經發布，Mac 這邊要做的是：讓殼能載入 2.0 前端，再出 Mac 2.0。這份報告是在 Windows 機器上寫的，**Mac 的程式碼一行都沒改**，下面的 Swift 是示意、沒有編譯過。
 
 ## 一句話總結
