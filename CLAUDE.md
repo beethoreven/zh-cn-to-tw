@@ -35,7 +35,7 @@
 - Backend/Web 部署在 Render/GitHub Pages，`main` 分支即時生效。
 - macOS App 走 GitHub Releases 版控（`zh-cn-to-tw-mac` repo 底下，`v<版本>-11-plus`/`v<版本>-10-15` 兩個 tag，DMG 掛在對應 Release 上，檔名刻意用 ASCII，見下面「已知的坑」）。
 - 下載頁 `https://beethoreven.github.io/zh-cn-to-tw-web/` 直接連到 GitHub Release 的 DMG 檔案本身（不是先連到 Release 頁面），連結網址是釘死版本號的，**每次出新版要手動同步這個頁面的連結**（`zh-cn-to-tw-web` 的 `update-page` 分支）。
-- Windows 版：已上線，走 GitHub Releases 版控（`zh-cn-to-tw-windows` repo 底下，tag 是 `v<版本>`，安裝檔 `ZhCnToTw-Setup-<版本>.exe` 掛在對應 Release 上，檔名同樣用 ASCII），下載頁也有 Windows 區塊，出新版一樣要手動同步連結。單一 build 支援 Windows 10（1607 以上）／11 的 64 位元，不支援 Win7。本機 OCR 已接上（跟 Mac 11+ 共用 `zh-cn-to-tw-ocr-service`，殼用 Job Object 確保子行程不會變孤兒）。版本號跟 Mac 版同步但沒有共用機制，寫死在三個地方要一起改：`ZhCnToTw.csproj`、`packaging/installer.iss`、`MainWindow.xaml.cs` 的 `appMinor`；`update_version` skill 只管 Mac，不會動到這三處。強制更新：Windows 沒有分流，前端送 `os=windows&os_version=default`，對應 `app_versions` 的 `('windows','default')`；但 1.x 與第一次發布的 2.0 前端送的是 `os=macos&os_version=windows`，所以暫時還要維護 `('macos','windows')` 那一列（見下面「待處理事項」）。DB 裡的 `('windows','10+')` 沒有任何前端會送，是殘留。細節與出新版的步驟見 `zh-cn-to-tw-windows` 的 README。
+- Windows 版：已上線，走 GitHub Releases 版控（`zh-cn-to-tw-windows` repo 底下，tag 是 `v<版本>`，安裝檔 `ZhCnToTw-Setup-<版本>.exe` 掛在對應 Release 上，檔名同樣用 ASCII），下載頁也有 Windows 區塊，出新版一樣要手動同步連結。單一 build 支援 Windows 10（1607 以上）／11 的 64 位元，不支援 Win7。本機 OCR 已接上（跟 Mac 11+ 共用 `zh-cn-to-tw-ocr-service`，殼用 Job Object 確保子行程不會變孤兒）。版本號跟 Mac 版同步但沒有共用機制，寫死在三個地方要一起改：`ZhCnToTw.csproj`、`packaging/installer.iss`、`MainWindow.xaml.cs` 的 `appMinor`；`update_version` skill 只管 Mac，不會動到這三處。強制更新：Windows 沒有分流，前端送 `os=windows&os_version=default`，對應 `app_versions` 的 `('windows','default')`；但 1.x 與第一次發布的 2.0 前端送的是 `os=macos&os_version=windows`，所以暫時還要維護 `('macos','windows')` 那一列（見下面「待處理事項」）。（原本 DB 裡沒有任何前端會送的 `('windows','10+')` 已於 2026-10-16 刪除。）細節與出新版的步驟見 `zh-cn-to-tw-windows` 的 README。
 
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
@@ -54,7 +54,7 @@
 
 - **Windows 強制更新暫時要改兩列，之後拿掉 `('macos','windows')`**（2026-10-16 起）：Windows 1.x 與第一次發布的 2.0 前端把 `os` 寫死成 `macos`、送 `os=macos&os_version=windows`；修正後重新發布的 2.0 起改送 `os=windows&os_version=default`。兩個 2.0 版號相同，從 DB 分不出誰還停在舊前端，所以：
   - **下一次 Windows 出新版要強制更新時**，`('windows','default')` 跟 `('macos','windows')` 兩列的門檻都要改，否則停在舊前端 2.0 的人不會被擋。
-  - 那次強制更新生效一段時間、舊前端的人都被逼去更新之後，就可以刪掉 `('macos','windows')`，之後 Windows 只維護 `('windows','default')` 一列。刪的時候順便刪掉沒人用的 `('windows','10+')`，並把這一條從清單拿掉。
+  - 那次強制更新生效一段時間、舊前端的人都被逼去更新之後，就可以刪掉 `('macos','windows')`，之後 Windows 只維護 `('windows','default')` 一列。刪完把這一條從清單拿掉。
   - `app_versions` 的門檻由使用者決定，不要自己去寫 DB。
 
 - **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
