@@ -4,7 +4,7 @@
 
 ## 這是什麼
 
-「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1），再跑一輪 LLM 校對（Stage 2）。桌面版是唯一的使用方式（OCR 一定在使用者本機做），有 macOS、Windows 兩種桌面版（見下面「目前線上狀態」）。
+「劇本殺繁化助手」：把簡體中文劇本殺 PDF 轉成繁體中文，跑 OCR + LLM 潤飾（Stage 1 繁化），再用程式套用替換範本、標點轉全形（Stage 2 通用修改，2.0 新增，套用本身不用 LLM；半形空格刻意不動，劇本常有英文），最後跑一輪 LLM 校對（Stage 3 校對）。**Stage 編號在 2.0 變過**：1.x 只有兩個 Stage，1.x 的「Stage 2 校對」就是 2.0 的 Stage 3——讀舊的 commit、README、程式註解時要留意是哪個版本的編號。桌面版是唯一的使用方式（OCR 一定在使用者本機做），有 macOS、Windows 兩種桌面版（見下面「目前線上狀態」）。
 
 ## Repo 結構
 
@@ -25,7 +25,7 @@
 ## 為什麼架構長這樣（快速版，細節見 `zh-cn-to-tw-backend` README）
 
 - **OCR 為什麼跑在使用者本機、不是後端**：PaddleOCR 記憶體/CPU 需求會直接把 Render 免費方案打爆（OOM、SIGILL）。桌面版把 OCR 移到本機執行。伺服器端 OCR 路徑（`POST /api/jobs`、`ocr_utils/`、paddle）已在 2026-10-03 整個拔掉，backend 只收 OCR 完的文字——**不要再把任何 OCR 相關的東西加回後端**，使用者明確要求線上只留 AI 呼叫、DB、帳號這類本來就要連網的部分。拔掉 paddle 也讓 backend 從 Python 3.9 升到 3.12（細節見 `zh-cn-to-tw-backend` README「拔掉伺服器端 OCR、升級到 Python 3.12」）。
-- **桌面版網頁用 `file://` 載入、不是本機 HTTP server**：本機 server 的 port 每次啟動都不一樣，會讓 `localStorage`（登入 session）的 origin 跟著變，等於每次開 App 都要重新登入。固定的 `file://` 路徑讓 origin 穩定。
+- **桌面版網頁一定要用「固定來源」載入、不是本機 HTTP server**：本機 server 的 port 每次啟動都不一樣，會讓 `localStorage`（登入 session）的 origin 跟著變，等於每次開 App 都要重新登入。1.x 用固定的 `file://` 路徑解決；2.0 起換掉 `file://`，因為它沒有來源（Origin 是 `"null"`），ES module 會被 CORS 擋下，前端沒辦法拆成多個模組。Windows 已改用 WebView2 虛擬主機 `https://zh-cn-to-tw.example`；Mac 要改用自訂 scheme `zhcntotw://app`（尚未實作，由 Mac 那邊依交接報告修改）。這兩個來源都已加進 `zh-cn-to-tw-backend` 與 `zh-cn-to-tw-ocr-service` 的 CORS 允許清單，`"null"` 暫時保留給舊版。改來源名稱 = 所有人的登入狀態失效 + 兩邊 CORS 都要改。
 - **登入 session 是應用程式自己發的、不是直接用 Google ID Token**：Google ID Token 只活 ~1 小時，直接拿來當長效憑證，長任務跑到一半會被登出、已經花錢算出來的結果存不進去。见 `google-auth`（使用者層級 skill，未搬進這個 repo，因為是通用模式不是這個專案專屬知識）。
 - **Render 與 Neon 必須開在同一個區域**（目前兩邊都是 AWS `ap-southeast-1` 新加坡）：這不是最佳化偏好，是這個系統效能的主要決定因素。原本 Neon 誤建在 `us-east-2`（俄亥俄），每次資料庫連線要跨太平洋往返六趟，光是一個 `COUNT` 查詢的端點就要 1.76 秒；搬到同區之後純資料庫成本降到 0.03 秒（約 59 倍）。**既有 Neon project 不能改區域**，只能新建再搬資料。判斷方法是一個比值：用 socket 量純 TCP 握手（恰好一個往返），拿建立連線的成本去除它，商數落在小整數（Postgres 是 6：TCP 1 + TLS 1-2 + SCRAM 約 3）就代表成本全是網路往返、換連線池也除不掉。完整推論見 `zh-cn-to-tw-backend/db_utils/connection.py` 的歷史教訓四與 `known-issue-check` item 25。
 - **macOS 11+ / 10.15 兩包分開版控**：`Package.swift` 的 `platforms` 是整個 SwiftPM package 共用一份，沒有 per-target 部署目標，沒辦法在同一個 target 裡同時支援 11+ 用的 `App`/`Scene`/`WindowGroup`（要 11.0+）又支援到 10.15。`zh-cn-to-tw-mac/Legacy/` 是完全獨立的第二個 SwiftPM package（部署目標 10.15），大部分原始碼用符號連結共用 `Sources/ZhCnToTw/` 同一份，只有進入點（`App.swift`）不同。10.15 那包 Stage 1 改用 Apple 原生 Vision framework 做 OCR，不透過 `zh-cn-to-tw-ocr-service`——onnxruntime（RapidOCR 依賴的推論引擎）編譯二進位檔 `minos` 寫死 11.0，10.15 上跑不動任何 Python-based OCR 引擎，這是 `otool -l` 直接查證過的硬限制，不是設計選擇。
@@ -40,7 +40,7 @@
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
 - **`zh-en-readme`**：這個專案所有 README 的格式慣例（中文報告 + SOP，英文鏡像，一段一行不手動硬換行）。改動任何 repo 的 README 前後都套用這個格式。
-- **`known-issue-check`**：累積的真實踩坑清單（目前 28 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
+- **`known-issue-check`**：累積的真實踩坑清單（目前 29 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境、後端改行為時沒顧到還沒升級的舊版用戶端等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
 - **`update_version`**：桌面版 App 出新版本號時用，同步更新 `Info.plist`（兩個分流各一份）跟 backend DB 的 `app_versions` 表。
 
 ## 跟這個專案協作時的慣例
@@ -52,4 +52,4 @@
 
 ## 待處理事項
 
-- **OCR 與 Stage 2 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
+- **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
