@@ -5,7 +5,9 @@
     python ../docs/handoff/force_update_2_0.py --apply    # 寫入 latest=min=2.0
 
 Windows 有兩列：
-- ('windows', '10+')：修正後的 Windows 2.0（重新發布）送 os=windows、os_version=10+，打這一列。
+- ('windows', 'default')：修正後的 Windows 2.0（重新發布）送 os=windows、os_version=default
+  （見 web 的 js/core/version.js 的 versionCheckKey），打這一列。DB 裡原本那列
+  ('windows', '10+') 沒有任何前端會送，這裡不動它。
 - ('macos', 'windows')：Windows 1.x 與第一次發布的 2.0 前端把 os 寫死成 macos、os_version=windows，
   只會打到這一列。要擋 ≤1.8 的舊 Windows 一定要有它。這一列原本不存在，所以用 UPSERT。
 """
@@ -21,7 +23,7 @@ from db_utils.connection import get_ready_conn, sql
 ROWS = [
     ("macos", "11+"),
     ("macos", "10.15"),
-    ("windows", "10+"),
+    ("windows", "default"),
     ("macos", "windows"),
 ]
 MAJOR, MINOR = 2, 0
