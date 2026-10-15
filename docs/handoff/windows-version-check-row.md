@@ -30,8 +30,8 @@
 
 使用者要求把這次的教訓加進**全域**設定，Mac 這台已經加了，但 `~/.claude/` 不跟 repo 走，Windows 那台要自己貼：
 
-1. **全域 `~/.claude/CLAUDE.md`**：在「開發原則」最後加上下面這一節（原文照貼）。
-2. **全域 `~/.claude/skills/known-issue-check/SKILL.md`**：把下面的條目接在 Checklist 最後。Mac 這台是第 37 條；你那台的編號如果不同，改成你那份的下一號，同時把上面 CLAUDE.md 那節裡的「第 37 條」跟著改。不要動專案版（`.claude/skills/known-issue-check/`），使用者說這條只加全域。
+1. **全域 skills**：Windows 那台原本沒有任何全域 skill。把同目錄的 `global-skills.zip`（有密碼，向使用者要）解壓到 `%USERPROFILE%\.claude\`，解完應該是 `%USERPROFILE%\.claude\skills\<skill 名>\SKILL.md`，共 13 個。檔案總管右鍵「全部解壓縮」就能輸入密碼（ZipCrypto）。這份是 Mac 這台 2026-10-16 的全域 skills，`known-issue-check` 已經含第 37 條，**下面第 2 段不用再貼**，只是留著當內容參考。注意全域的 `update_version` 跟專案版刻意不同，在這個 repo 裡以專案版為準。
+2. **全域 `~/.claude/CLAUDE.md`**：在「開發原則」最後加上下面「1. 全域 CLAUDE.md 要加的一節」（原文照貼）。這台如果還沒有全域 CLAUDE.md，就新建一個，開頭照 Mac 那份寫「# 開發原則」。
 
 ### 1. 全域 CLAUDE.md 要加的一節
 
