@@ -57,4 +57,6 @@
   - 那次強制更新生效一段時間、舊前端的人都被逼去更新之後，就可以刪掉 `('macos','windows')`，之後 Windows 只維護 `('windows','default')` 一列。刪完把這一條從清單拿掉。
   - `app_versions` 的門檻由使用者決定，不要自己去寫 DB。
 
+- **2.1 要做：ocr-service 關掉 RapidOCR 的方向分類器**（2026-11-08 查證，使用者決定排進 2.1）：`zh-cn-to-tw-ocr-service/ocr_utils/ocr_engine.py` 用 `RapidOCR()` 預設值，`use_cls` 是開的。分類器會把某些行（常見於同一行粗細體混排）誤判成顛倒、轉 180 度後辨識失敗，再被 RapidOCR 內建 `text_score` 0.5 濾掉，整行消失、沒有任何警告。實測 `zh-cn-to-tw-backend/uploads/06db9aaebb11.pdf`（24 頁，200 dpi）：開 cls 654 行、關 cls 660 行，漏的是完整劇情句子；反方向（只有開 cls 才讀到）一行都沒有。劇本都是正向橫排，用不到方向判斷。修法：`ocr(...)` 呼叫加 `use_cls=False`，之後重新打包 Mac 11+ 與 Windows 兩包內嵌的 OCR 執行檔。Mac 10.15 不用 RapidOCR，不受影響。改完可順便評估 `text_score` 要不要調低。做完把這一條拿掉。
+
 - **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
