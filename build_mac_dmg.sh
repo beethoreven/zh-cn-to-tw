@@ -45,8 +45,8 @@ OCR_SERVICE_REPO="$REPO_ROOT/zh-cn-to-tw-ocr-service"
 OCR_SERVICE_BIN="$OCR_SERVICE_REPO/dist/zh-cn-to-tw-ocr-service/zh-cn-to-tw-ocr-service"
 
 # ---------------------------------------------------------------------------
-# 1. 重建內嵌的 OCR 服務執行檔（只有 11+ 那包會用到；10.15 那包走 Apple
-#    Vision framework，完全不內嵌這個東西，見 build_app_10_15.sh）
+# 1. 重建內嵌的 OCR 服務執行檔（只有 11+ 那包會用到；10.15 那包用內嵌的
+#    Tesseract，由 build_app_10_15.sh 自己編譯，完全不內嵌這個東西）
 # ---------------------------------------------------------------------------
 echo "==> [1/3] 重新打包 zh-cn-to-tw-ocr-service（PyInstaller）"
 

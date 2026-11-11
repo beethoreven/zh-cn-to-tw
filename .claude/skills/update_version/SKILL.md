@@ -18,8 +18,8 @@ description: Bump the zh-cn-to-tw macOS app's version number for one or both OS 
 - **11+**：`zh-cn-to-tw-mac/packaging/Info.plist`，對應 DB 的
   `app_versions` 表裡 `os='macos', os_version='11+'` 那一列
 - **10.15**：`zh-cn-to-tw-mac/packaging/Info-10-15.plist`，對應
-  `os='macos', os_version='10.15'` 那一列（Stage 1 用 Apple 原生
-  Vision framework 做 OCR，不透過 `zh-cn-to-tw-ocr-service`）
+  `os='macos', os_version='10.15'` 那一列（Stage 1 用 App 內嵌的
+  Tesseract 做 OCR，不透過 `zh-cn-to-tw-ocr-service`）
 
 ## 參數
 

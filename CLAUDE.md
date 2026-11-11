@@ -28,7 +28,7 @@
 - **桌面版網頁一定要用「固定來源」載入、不是本機 HTTP server**：本機 server 的 port 每次啟動都不一樣，會讓 `localStorage`（登入 session）的 origin 跟著變，等於每次開 App 都要重新登入。1.x 用固定的 `file://` 路徑解決；2.0 起換掉 `file://`，因為它沒有來源（Origin 是 `"null"`），ES module 會被 CORS 擋下，前端沒辦法拆成多個模組。Windows 已改用 WebView2 虛擬主機 `https://zh-cn-to-tw.example`；Mac 改用自訂 scheme `zhcntotw://app`（`zh-cn-to-tw-mac` 的 `WebView.swift` 的 `WebAssetSchemeHandler` 從 `.app` 的 `Resources/web/` 供應檔案，2.0 起生效；交接報告已從 repo 移除，要看用 `git show def41aa:docs/handoff/mac-2.0.md`）。這兩個來源都已加進 `zh-cn-to-tw-backend` 與 `zh-cn-to-tw-ocr-service` 的 CORS 允許清單，`"null"` 暫時保留給舊版。改來源名稱 = 所有人的登入狀態失效 + 兩邊 CORS 都要改。
 - **登入 session 是應用程式自己發的、不是直接用 Google ID Token**：Google ID Token 只活 ~1 小時，直接拿來當長效憑證，長任務跑到一半會被登出、已經花錢算出來的結果存不進去。见 `google-auth`（使用者層級 skill，未搬進這個 repo，因為是通用模式不是這個專案專屬知識）。
 - **Render 與 Neon 必須開在同一個區域**（目前兩邊都是 AWS `ap-southeast-1` 新加坡）：這不是最佳化偏好，是這個系統效能的主要決定因素。原本 Neon 誤建在 `us-east-2`（俄亥俄），每次資料庫連線要跨太平洋往返六趟，光是一個 `COUNT` 查詢的端點就要 1.76 秒；搬到同區之後純資料庫成本降到 0.03 秒（約 59 倍）。**既有 Neon project 不能改區域**，只能新建再搬資料。判斷方法是一個比值：用 socket 量純 TCP 握手（恰好一個往返），拿建立連線的成本去除它，商數落在小整數（Postgres 是 6：TCP 1 + TLS 1-2 + SCRAM 約 3）就代表成本全是網路往返、換連線池也除不掉。完整推論見 `zh-cn-to-tw-backend/db_utils/connection.py` 的歷史教訓四與 `known-issue-check` item 25。
-- **macOS 11+ / 10.15 兩包分開版控**：`Package.swift` 的 `platforms` 是整個 SwiftPM package 共用一份，沒有 per-target 部署目標，沒辦法在同一個 target 裡同時支援 11+ 用的 `App`/`Scene`/`WindowGroup`（要 11.0+）又支援到 10.15。`zh-cn-to-tw-mac/Legacy/` 是完全獨立的第二個 SwiftPM package（部署目標 10.15），大部分原始碼用符號連結共用 `Sources/ZhCnToTw/` 同一份，只有進入點（`App.swift`）不同。10.15 那包 Stage 1 改用 Apple 原生 Vision framework 做 OCR，不透過 `zh-cn-to-tw-ocr-service`——onnxruntime（RapidOCR 依賴的推論引擎）編譯二進位檔 `minos` 寫死 11.0，10.15 上跑不動任何 Python-based OCR 引擎，這是 `otool -l` 直接查證過的硬限制，不是設計選擇。
+- **macOS 11+ / 10.15 兩包分開版控**：`Package.swift` 的 `platforms` 是整個 SwiftPM package 共用一份，沒有 per-target 部署目標，沒辦法在同一個 target 裡同時支援 11+ 用的 `App`/`Scene`/`WindowGroup`（要 11.0+）又支援到 10.15。`zh-cn-to-tw-mac/Legacy/` 是完全獨立的第二個 SwiftPM package（部署目標 10.15），大部分原始碼用符號連結共用 `Sources/ZhCnToTw/` 同一份，只有進入點（`App.swift`）不同。10.15 那包 Stage 1 不透過 `zh-cn-to-tw-ocr-service`——onnxruntime（RapidOCR 依賴的推論引擎）編譯二進位檔 `minos` 寫死 11.0，10.15 上跑不動任何 Python-based OCR 引擎，這是 `otool -l` 直接查證過的硬限制，不是設計選擇。改用 App 內嵌的 Tesseract（`packaging/build_tesseract_10_15.sh` 從原始碼編成 minos 10.15 的靜態執行檔）。**不要改回 Apple Vision framework**：10.15 的 Vision 只有 Revision1、只認得英文，指定中文不會報錯、會默默把中文辨識成英文字母（2.0（含）以前就是這樣，2026-11 實機回報「亂碼」才發現）；在新系統上測試完全看不出來。10.15 那包會把 log 寫到使用者的 `~/Library/Logs/ZhCnToTw/app.log`，遠端排查時請對方傳這個檔案。
 
 ## 目前線上狀態
 
@@ -40,7 +40,7 @@
 ## 專案自帶的 Skills（`.claude/skills/`，跟著這個 repo 走，任何機器 clone 下來都能用）
 
 - **`zh-en-readme`**：這個專案所有 README 的格式慣例（中文報告 + SOP，英文鏡像，一段一行不手動硬換行）。改動任何 repo 的 README 前後都套用這個格式。
-- **`known-issue-check`**：累積的真實踩坑清單（目前 29 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境、後端改行為時沒顧到還沒升級的舊版用戶端等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
+- **`known-issue-check`**：累積的真實踩坑清單（目前 31 條，涵蓋 race condition、資源生命週期、CORS/origin、鎖與併發、bash 3.2 的坑、build 腳本沒真的重新編譯、把部署拓撲問題當應用層問題優化、輸出編碼繼承環境、後端改行為時沒顧到還沒升級的舊版用戶端、系統 API 在舊版 OS 上默默降級、等待狀態只有成功出口等），每條都有具體案例。**寫完程式碼、覺得做完之前，對照這份清單檢查一次**；找到新的一類坑，加進這份清單。
 - **`update_version`**：桌面版 App 出新版本號時用，同步更新 `Info.plist`（兩個分流各一份）跟 backend DB 的 `app_versions` 表。
 
 ## 跟這個專案協作時的慣例
@@ -57,6 +57,6 @@
   - 那次強制更新生效一段時間、舊前端的人都被逼去更新之後，就可以刪掉 `('macos','windows')`，之後 Windows 只維護 `('windows','default')` 一列。刪完把這一條從清單拿掉。
   - `app_versions` 的門檻由使用者決定，不要自己去寫 DB。
 
-- **2.1 要做：ocr-service 關掉 RapidOCR 的方向分類器**（2026-11-08 查證，使用者決定排進 2.1）：`zh-cn-to-tw-ocr-service/ocr_utils/ocr_engine.py` 用 `RapidOCR()` 預設值，`use_cls` 是開的。分類器會把某些行（常見於同一行粗細體混排）誤判成顛倒、轉 180 度後辨識失敗，再被 RapidOCR 內建 `text_score` 0.5 濾掉，整行消失、沒有任何警告。實測 `zh-cn-to-tw-backend/uploads/06db9aaebb11.pdf`（24 頁，200 dpi）：開 cls 654 行、關 cls 660 行，漏的是完整劇情句子；反方向（只有開 cls 才讀到）一行都沒有。劇本都是正向橫排，用不到方向判斷。修法：`ocr(...)` 呼叫加 `use_cls=False`，之後重新打包 Mac 11+ 與 Windows 兩包內嵌的 OCR 執行檔。Mac 10.15 不用 RapidOCR，不受影響。改完可順便評估 `text_score` 要不要調低。做完把這一條拿掉。
+- **Windows 2.1 還沒打包發布**（2026-11-11）：2.1 的程式碼、版本號（`ZhCnToTw.csproj`、`installer.iss`、`appMinor`）都已 commit，Mac 兩包已發布。Windows 這次有兩個要在 Windows 上親手確認的地方：殼的 `MainWindow.xaml.cs` 改了登入失敗的處理（2.1 第一次改、還沒在任何機器上編譯過），以及內嵌的 ocr-service 要重新打包（2.1 關掉了 RapidOCR 的方向分類器，`use_cls=False`，修正整行漏讀；舊的打包產物不會有這個修正，見 `known-issue-check` 第 21 條）。發布後要在下載頁 Windows 區塊新增 2.1 的 `.version-block`（不要改寫 2.0 那個），更新說明已經寫好在下載頁上。發布完把這一條拿掉。
 
 - **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
