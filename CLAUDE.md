@@ -58,6 +58,4 @@
   - 那次強制更新生效一段時間、舊前端的人都被逼去更新之後，就可以刪掉 `('macos','windows')`，之後 Windows 只維護 `('windows','default')` 一列。刪完把這一條從清單拿掉。
   - `app_versions` 的門檻由使用者決定，不要自己去寫 DB。
 
-- **Windows 2.1 還沒打包發布**（2026-11-11）：2.1 的程式碼、版本號（`ZhCnToTw.csproj`、`installer.iss`、`appMinor`）都已 commit，Mac 兩包已發布。Windows 這次有兩個要在 Windows 上親手確認的地方：殼的 `MainWindow.xaml.cs` 改了登入失敗的處理（2.1 第一次改、還沒在任何機器上編譯過），以及內嵌的 ocr-service 要重新打包（2.1 關掉了 RapidOCR 的方向分類器，`use_cls=False`，修正整行漏讀；舊的打包產物不會有這個修正，見 `known-issue-check` 第 21 條）。發布後要在下載頁 Windows 區塊新增 2.1 的 `.version-block`（不要改寫 2.0 那個），更新說明已經寫好在下載頁上。發布完把這一條拿掉。
-
 - **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
