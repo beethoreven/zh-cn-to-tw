@@ -29,6 +29,12 @@
 # 都要嘛在這裡一起重建，要嘛明確驗證它跟目前原始碼一致——不能因為
 # 「它不是我編的」就預設它是新的。
 #
+# ocr-service venv 裡裝的套件也是這種輸入：PyInstaller 包進去的是 venv 裡
+# 實際裝著的版本，不是 requirements.txt 寫的版本。2026-11 為了修安全弱點
+# 把 PyMuPDF／Pillow 升版時發現，這台機器的 venv 還停在舊版，照舊打包
+# 就會把舊版包進 App、沒有任何錯誤。所以重建前一律先照 requirements 檔
+# 同步 venv（known-issue-check 第 21 條）。
+#
 # 重建完 ocr-service 之後還會實際把它跑起來、打一次 /health 才算過：
 # 這次踩到的另一個問題正是 PyInstaller 回報 "Build complete!"、產物卻
 # 在 import 階段就 TypeError 直接崩潰（新程式碼用了 PEP 604 的
@@ -62,6 +68,15 @@ if [ ! -x "$OCR_SERVICE_REPO/venv/bin/pyinstaller" ]; then
   echo "    請照 zh-cn-to-tw-ocr-service README「打包成獨立執行檔」章節先建好那個 repo 自己的 venv。"
   echo "    （刻意不自動幫忙建：打包環境的 Python 版本會直接影響產物能不能跑，"
   echo "      這件事應該由維護者明確決定，不是腳本偷偷替你決定。）"
+  exit 1
+fi
+
+# 打包前先照 requirements 檔同步 venv（原因見檔案開頭）。版本都釘死了，
+# venv 已經一致時 pip 只檢查、不下載，也不需要網路。
+echo "    同步 venv 套件到 requirements.txt、requirements-build.txt"
+if ! "$OCR_SERVICE_REPO/venv/bin/python" -m pip install --disable-pip-version-check \
+    -r "$OCR_SERVICE_REPO/requirements.txt" -r "$OCR_SERVICE_REPO/requirements-build.txt"; then
+  echo "    venv 套件同步失敗（見上面 pip 的訊息）。沒同步就打包，包進去的可能是舊版套件，所以停在這裡。"
   exit 1
 fi
 

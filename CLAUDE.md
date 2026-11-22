@@ -63,6 +63,12 @@
 
 - **2.2 延後處理的安全項目**（2026-11-19）：這次修正範圍外、刻意延後的項目，細節不寫在這裡（所有 repo 都是公開的），記在本機的 memory 與協調 session `local_817e3d5d-1356-450f-8694-8b2062e22e43`（「跨專案主導討論」）。下次動到登入、下載或後端權限檢查時，先去看那份清單。
 
+- **下一版的改動先放在 `next` 分支，等 Windows 2.2 重新發布之後才合併進 `main`**（2026-11-22）：一批中低風險的安全加固已經 push 到 zh-cn-to-tw-web、zh-cn-to-tw-mac、zh-cn-to-tw-windows、zh-cn-to-tw-ocr-service 各自的 `next` 分支（CSP、殼的導覽限制與關掉檢查器、環境變數覆寫只在開發時生效、apiBase 白名單、escapeHtml 跳脫引號、Word 隱藏文字提示、OCR 套件升級與 dpi 範圍、Windows 打包前同步 venv），meta-repo 的子模組指標還停在 2.2；zh-cn-to-tw-backend 的部分已經直接上線（`da6ff2e`）。不放 `main` 的原因：Windows 2.2 帶登入 nonce 的重新發布還沒做（Release 上的安裝檔還是第一次發布的那個），而 Windows 打包直接拿工作目錄裡的子模組，`main` 一動就可能被一起包進 2.2。
+  - **Windows 2.2 重新發布時**：照 meta-repo 釘的版本打包，`git submodule update` 之後 zh-cn-to-tw-windows 應該在 `ee71437`、zh-cn-to-tw-web 在 `27b9ca9`、zh-cn-to-tw-ocr-service 在 `b62b052`，不要切到 `next`。
+  - **重新發布之後**（或決定不重發、直接出下一版時）：四個 repo 各自 `git switch main && git merge --ff-only next && git push origin main`，刪掉本機與遠端的 `next`，再更新 meta-repo 的子模組指標。做完把這一條拿掉。
+  - **下一版發布前一定要測**：Windows 從沒編譯過這批改動，`build_installer.bat` 新加的 venv 同步也沒跑過；index.html 的 CSP 會不會擋到 WebView2 注入的腳本（被擋的話登入和 OCR 會壞）；10.15 實機；用真的 Google 帳號登入；Stage 1／3 用真的 LLM 跑一次，看新的輸出長度上限有沒有誤擋。
+  - **後端上線後還沒看 log**：Render log 裡「[rate-limit] 第一次收到 IP 取自…」那兩行，使用者的請求要落在 CF-Connecting-IP；如果只出現「連線位址」，代表所有人共用同一份限流額度，要回頭改 IP 的取法。也看一下有沒有「[schema] 警告」（users 有只差大小寫的重複 email，或名稱是 admin、id 卻不是 1 的角色）。看過沒問題就把這一點拿掉。
+
 - **Windows 安裝檔腳本的 `x64` 已棄用**（2026-11-19）：Inno Setup 打包 2.2 時警告 `ArchitecturesAllowed`／`ArchitecturesInstallIn64BitMode` 的 `x64` 已棄用、建議改 `x64compatible`，目前不影響產出。下次在 Windows 打包時順手改掉並實際裝一次確認。
 
 - **OCR 與 Stage 2／3 解耦**：目前整個桌面殼是單一 binary，一個作業系統版本門檻會擋住整個 App（包含完全不需要 OCR 的 Stage 2、Stage 3）。已經動手拆過一次（10.15 分流），但更廣義的「哪個子系統掛了不該連坐拖累另一個」還沒有系統性檢視過，之後有機會可以順手看看還有沒有類似情況。
