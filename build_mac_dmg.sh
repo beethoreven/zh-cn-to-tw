@@ -157,10 +157,12 @@ cleanup_smoke() {
 }
 trap cleanup_smoke EXIT INT TERM
 
-# 模型載入需要時間，最多等 60 秒；每秒檢查一次 process 還在不在（提早
+# 剛打包好的第一次啟動很慢：macOS 會先逐一檢查裡面上百個執行檔與函式庫
+# （實測 49～79 秒，第二次不到 2 秒），所以最多等 240 秒；每秒檢查一次
+# process 還在不在（提早
 # 崩潰就不用再等下去了）跟有沒有印出 port。
 SMOKE_PORT=""
-for _ in $(seq 1 60); do
+for _ in $(seq 1 240); do
   if ! kill -0 "$SMOKE_PID" 2>/dev/null; then
     echo "    OCR 服務啟動後隨即結束，這份打包產物是壞的。輸出："
     sed 's/^/      /' "$SMOKE_LOG"
@@ -172,7 +174,7 @@ for _ in $(seq 1 60); do
 done
 
 if [ -z "$SMOKE_PORT" ]; then
-  echo "    等了 60 秒仍沒看到 OCR_SERVICE_PORT，判定啟動失敗。輸出："
+  echo "    等了 240 秒仍沒看到 OCR_SERVICE_PORT，判定啟動失敗。輸出："
   sed 's/^/      /' "$SMOKE_LOG"
   exit 1
 fi
