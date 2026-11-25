@@ -71,6 +71,28 @@ if [ ! -x "$OCR_SERVICE_REPO/venv/bin/pyinstaller" ]; then
   exit 1
 fi
 
+# venv 的 Python 要是 3.12，而且直譯器本身要能在 macOS 11 跑：PyInstaller
+# 會把它一起包進 App。pyenv、Homebrew 在新系統上自己編的 Python，最低系統
+# 版本跟著開發機（例如 26），包出來的東西在 macOS 11 上直接起不來；uv 安裝
+# 的 Python 與 python.org 的安裝檔是 10.15 以下（見 zh-cn-to-tw-ocr-service 的
+# requirements.in 開頭）。
+if ! "$OCR_SERVICE_REPO/venv/bin/python" - <<'PY'
+import sys, sysconfig
+target = sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET") or "?"
+ok_version = sys.version_info[:2] == (3, 12)
+try:
+    ok_target = tuple(int(x) for x in target.split(".")) <= (11, 0)
+except ValueError:
+    ok_target = False
+if not (ok_version and ok_target):
+    print(f"    venv 的 Python 是 {sys.version.split()[0]}（最低 macOS {target}），需要 3.12、最低 macOS 11.0 以下。")
+    sys.exit(1)
+PY
+then
+  echo "    請照 zh-cn-to-tw-ocr-service README「打包成獨立執行檔」用 3.12 重建 venv。"
+  exit 1
+fi
+
 # 打包前先照 requirements 檔同步 venv（原因見檔案開頭）。版本都釘死了，
 # venv 已經一致時 pip 只檢查、不下載，也不需要網路。
 echo "    同步 venv 套件到 requirements.txt、requirements-build.txt"
@@ -90,6 +112,27 @@ rm -rf "$OCR_SERVICE_REPO/build" "$OCR_SERVICE_REPO/dist"
 
 if [ ! -x "$OCR_SERVICE_BIN" ]; then
   echo "    PyInstaller 跑完了，但找不到預期的執行檔：$OCR_SERVICE_BIN"
+  exit 1
+fi
+
+# 包進去的每個二進位檔，最低系統版本（otool -l 的 minos）都不能超過 11.0。
+# wheel 檔名上寫的支援版本不可靠：opencv-python 4.9.0.80 的檔名寫 10_16，
+# 內附的 ffmpeg 卻是 12.0；cv2 會直接連結它們，macOS 11 上載入就失敗。在
+# 新系統上測試完全看不出來，只能在這裡逐檔檢查。
+TOO_NEW="$(
+  find "$OCR_SERVICE_REPO/dist" -type f | while IFS= read -r f; do
+    file -b "$f" | grep -q Mach-O || continue
+    minos="$(otool -l "$f" | awk '/LC_BUILD_VERSION/{b=1} b&&/minos/{print $2; exit} /LC_VERSION_MIN_MACOSX/{v=1} v&&/ version/{print $2; exit}')"
+    major="${minos%%.*}"
+    if [ -z "$minos" ] || [ "$major" -gt 11 ] || { [ "$major" -eq 11 ] && [ "$minos" != "11.0" ]; }; then
+      echo "      ${minos:-（讀不到）} ${f#"$OCR_SERVICE_REPO/"}"
+    fi
+  done
+)"
+if [ -n "$TOO_NEW" ]; then
+  echo "    下面這些檔案的最低 macOS 版本超過 11.0，包進 App 之後 macOS 11 的使用者 Stage 1 會跑不起來："
+  echo "$TOO_NEW"
+  echo "    通常是某個套件升到只支援新系統的版本，見 zh-cn-to-tw-ocr-service 的 requirements.in。"
   exit 1
 fi
 
