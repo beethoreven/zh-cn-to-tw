@@ -45,7 +45,7 @@ set -euo pipefail
 export LC_ALL=C
 
 REPO_ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-CONFIG="${1:-debug}"
+CONFIG="${1:-release}"
 
 OCR_SERVICE_REPO="$REPO_ROOT/zh-cn-to-tw-ocr-service"
 OCR_SERVICE_BIN="$OCR_SERVICE_REPO/dist/zh-cn-to-tw-ocr-service/zh-cn-to-tw-ocr-service"
